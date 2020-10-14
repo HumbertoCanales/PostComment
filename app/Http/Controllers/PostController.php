@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
-    
-    public function index()
+    public function all()
     {
-        $posts = Post::all();
-        return response()->json($posts, 200);
+        $all = Post::all();
+        return response()->json($all, 200);
     }
+    
+    
 
     public function store(Request $request)
     {
@@ -29,7 +30,7 @@ class PostController extends Controller
             return response()->json($errors, 400);
         }else{
             $post = Post::create($request->all());
-            return response()->json($post, 200);
+            return response()->json($post, 201);
         }
     }
 
@@ -58,18 +59,25 @@ class PostController extends Controller
             if($validator->fails()){
                 return response()->json($errors, 400);
             }else{
-                Post::where('id',$id) -> update(
+                Post::find($id) -> update(
                     ['title' => $request['title'],
                     'content' => $request['content'],
                     'author' => $request['author']
                     ]);
                 $post = Post::find($id);
-                return response()->json($post, 200);
+                return response()->json($post, 201);
             }
         }else{
             return response()->json(['error' => "The post you wanted to update doesn't exists.",
-                                      'code' => 404], 404);
+                                      'code' => 400], 400);
         }
+    }
+
+    public function destroyAll()
+    {
+        Comment::all()->delete();
+        Post::all()->delete();
+        return response()->json(['message' => "All the posts and comments have been deleted succesfully.", 'code' => 200], 200);
     }
 
     public function destroy($id)
@@ -79,10 +87,10 @@ class PostController extends Controller
             $title = $post['title'];
             Comment::where('post', $id)->delete();
             Post::destroy($id);
-            return response()->json("The post titled '".$title."' has been deleted succesfully.", 200);
+            return response()->json(['message' => "The post titled '".$title."' has been deleted succesfully.", 'code' => 200], 200);
         }else{
-            return response()->json(['error' => "The post you wanted to delete doesn't exists.",
-                                      'code' => 404], 404);
+            return response()->json(['message' => "The post you wanted to delete doesn't exists.",
+                                      'code' => 400], 400);
         }
     }
 }
