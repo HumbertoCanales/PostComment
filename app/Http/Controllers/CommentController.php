@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CommentController extends Controller
 {
-    public function index()
+    public function index(Post $post)
     {
-        $comments = Comment::all();
+        $comments = Comment::where('post', $post['id'])->get();
         return response()->json($comments, 200);
     }
 
@@ -71,7 +71,7 @@ class CommentController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Post $post, $id)
     {
         $comment = Comment::find($id);
         if($comment){
